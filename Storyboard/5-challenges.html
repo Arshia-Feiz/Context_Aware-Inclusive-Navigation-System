@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard 5: Challenges & Lessons Learned</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f13;
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 48px 60px;
+        }
+
+        .page-header { margin-bottom: 40px; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p { color: #94a3b8; font-size: 16px; }
+
+        .team-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #71717a;
+            margin-bottom: 20px;
+        }
+
+        /* --- Data Architecture Pipeline --- */
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .arch-panel {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .arch-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .arch-header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .arch-header-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .arch-body {
+            padding: 28px;
+        }
+
+        /* Pipeline Flow */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .flow-step {
+            display: flex;
+            gap: 16px;
+            position: relative;
+        }
+
+        .flow-timeline {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+            width: 40px;
+        }
+
+        .flow-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid;
+            flex-shrink: 0;
+            z-index: 1;
+            background: #18181b;
+        }
+
+        .flow-line {
+            width: 2px;
+            flex: 1;
+            min-height: 20px;
+        }
+
+        .flow-step:nth-child(1) .flow-dot { border-color: #f97316; }
+        .flow-step:nth-child(1) .flow-line { background: linear-gradient(to bottom, #f97316, #3b82f6); }
+        .flow-step:nth-child(2) .flow-dot { border-color: #3b82f6; }
+        .flow-step:nth-child(2) .flow-line { background: linear-gradient(to bottom, #3b82f6, #8b5cf6); }
+        .flow-step:nth-child(3) .flow-dot { border-color: #8b5cf6; }
+        .flow-step:nth-child(3) .flow-line { background: linear-gradient(to bottom, #8b5cf6, #22c55e); }
+        .flow-step:nth-child(4) .flow-dot { border-color: #22c55e; }
+        .flow-step:nth-child(4) .flow-line { background: linear-gradient(to bottom, #22c55e, #6366f1); }
+        .flow-step:nth-child(5) .flow-dot { border-color: #6366f1; }
+        .flow-step:last-child .flow-line { display: none; }
+
+        .flow-content {
+            padding-bottom: 28px;
+            flex: 1;
+        }
+
+        .flow-step:last-child .flow-content { padding-bottom: 0; }
+
+        .flow-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 4px;
+        }
+
+        .flow-desc {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .flow-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .flow-tag {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: #a1a1aa;
+        }
+
+        /* Data Sources Diagram */
+        .sources-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .source-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 16px 20px;
+            transition: border-color 0.2s;
+        }
+
+        .source-row:hover { border-color: rgba(255,255,255,0.1); }
+
+        .source-icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .source-row:nth-child(1) .source-icon-wrap { background: rgba(239,68,68,0.12); color: #f87171; }
+        .source-row:nth-child(2) .source-icon-wrap { background: rgba(234,179,8,0.12); color: #fde047; }
+        .source-row:nth-child(3) .source-icon-wrap { background: rgba(249,115,22,0.12); color: #fb923c; }
+        .source-row:nth-child(4) .source-icon-wrap { background: rgba(34,197,94,0.12); color: #4ade80; }
+        .source-row:nth-child(5) .source-icon-wrap { background: rgba(59,130,246,0.12); color: #60a5fa; }
+
+        .source-info { flex: 1; }
+
+        .source-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d4d4d8;
+            margin-bottom: 2px;
+        }
+
+        .source-detail {
+            font-size: 11px;
+            color: #52525b;
+        }
+
+        .source-format {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .format-csv { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+        .format-geojson { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+        .format-pbf { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.2); }
+
+        .source-records {
+            font-size: 10px;
+            color: #52525b;
+            font-family: 'JetBrains Mono', monospace;
+            flex-shrink: 0;
+            min-width: 70px;
+            text-align: right;
+        }
+
+        /* --- Challenges & Lessons --- */
+        .challenges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .challenge-card {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .challenge-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .challenge-card:nth-child(1)::before { background: linear-gradient(90deg, #f97316, #ef4444); }
+        .challenge-card:nth-child(2)::before { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+        .challenge-card:nth-child(3)::before { background: linear-gradient(90deg, #22c55e, #14b8a6); }
+
+        .challenge-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .challenge-card:nth-child(1) .challenge-icon { background: rgba(249,115,22,0.12); color: #fb923c; }
+        .challenge-card:nth-child(2) .challenge-icon { background: rgba(59,130,246,0.12); color: #60a5fa; }
+        .challenge-card:nth-child(3) .challenge-icon { background: rgba(34,197,94,0.12); color: #4ade80; }
+
+        .challenge-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .challenge-card:nth-child(1) .challenge-label { color: #fb923c; }
+        .challenge-card:nth-child(2) .challenge-label { color: #60a5fa; }
+        .challenge-card:nth-child(3) .challenge-label { color: #4ade80; }
+
+        .challenge-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .challenge-desc {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .challenge-solution {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+
+        .solution-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #52525b;
+            margin-bottom: 6px;
+        }
+
+        .solution-text {
+            font-size: 12px;
+            color: #a1a1aa;
+            line-height: 1.6;
+        }
+
+        /* --- Error Handling UI --- */
+        .error-section {
+            margin-bottom: 20px;
+        }
+
+        .error-mockup {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 700px;
+        }
+
+        .error-browser-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 20px;
+            background: #1e1e24;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .browser-dot:nth-child(1) { background: #ef4444; }
+        .browser-dot:nth-child(2) { background: #eab308; }
+        .browser-dot:nth-child(3) { background: #22c55e; }
+
+        .browser-url {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            color: #52525b;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .error-content {
+            padding: 48px 40px;
+            text-align: center;
+        }
+
+        .error-icon-big {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(234,179,8,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .error-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fde047;
+            margin-bottom: 8px;
+        }
+
+        .error-detail {
+            font-size: 13px;
+            color: #71717a;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .error-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .error-btn:hover { opacity: 0.85; }
+
+        .error-btn.primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .error-btn.secondary {
+            background: #27272a;
+            color: #a1a1aa;
+            border: 1px solid #3f3f46;
+        }
+
+        .error-note {
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: rgba(234,179,8,0.06);
+            border: 1px solid rgba(234,179,8,0.15);
+            border-radius: 10px;
+            font-size: 12px;
+            color: #a1a1aa;
+            line-height: 1.6;
+            text-align: left;
+            max-width: 700px;
+        }
+
+        .error-note strong {
+            color: #fde047;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Storyboard 5
+    </div>
+    <h1>Challenges & Lessons Learned</h1>
+    <p>Data integration architecture, sourcing pipeline, and graceful error handling</p>
+    <div class="team-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Arshia / Andrew / Dunny
+    </div>
+</div>
+
+<!-- Data Architecture -->
+<div class="architecture-grid">
+    <!-- Left: Pipeline Flow -->
+    <div class="arch-panel">
+        <div class="arch-header">
+            <div class="arch-header-icon" style="background: rgba(99,102,241,0.12); color: #a5b4fc;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="arch-header-text">Data Integration Pipeline</div>
+        </div>
+        <div class="arch-body">
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-timeline">
+                        <div class="flow-dot"></div>
+                        <div class="flow-line"></div>
+                    </div>
+                    <div class="flow-content">
+                        <div class="flow-title">Raw Data Acquisition</div>
+                        <div class="flow-desc">Download disparate datasets from Toronto Open Data, Toronto Police, and Geofabrik. Files range from 500 KB to 200 MB in CSV, GeoJSON, and PBF formats.</div>
+                        <div class="flow-tags">
+                            <span class="flow-tag">CSV</span>
+                            <span class="flow-tag">GeoJSON</span>
+                            <span class="flow-tag">PBF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-timeline">
+                        <div class="flow-dot"></div>
+                        <div class="flow-line"></div>
+                    </div>
+                    <div class="flow-content">
+                        <div class="flow-title">Parsing & Normalization</div>
+                        <div class="flow-desc">Apache Commons CSV parser for tabular data, Jackson for GeoJSON geometry extraction. Handle missing fields, invalid coordinates, and encoding issues.</div>
+                        <div class="flow-tags">
+                            <span class="flow-tag">ContextDataLoader.java</span>
+                            <span class="flow-tag">Batch 1000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-timeline">
+                        <div class="flow-dot"></div>
+                        <div class="flow-line"></div>
+                    </div>
+                    <div class="flow-content">
+                        <div class="flow-title">H2 Database Storage</div>
+                        <div class="flow-desc">JPA entities with spatial indexes persisted to disk. Batch inserts (1000 records) with Hibernate optimizations for fast initial loading.</div>
+                        <div class="flow-tags">
+                            <span class="flow-tag">CrimeIncident</span>
+                            <span class="flow-tag">StreetLight</span>
+                            <span class="flow-tag">ConstructionProject</span>
+                            <span class="flow-tag">HealthService</span>
+                            <span class="flow-tag">CyclingSegment</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-timeline">
+                        <div class="flow-dot"></div>
+                        <div class="flow-line"></div>
+                    </div>
+                    <div class="flow-content">
+                        <div class="flow-title">Spatial Queries</div>
+                        <div class="flow-desc">Bounding box lookups during routing: crime density, street light coverage, construction zones, nearest hospital. Results normalized to 0-1 scores.</div>
+                        <div class="flow-tags">
+                            <span class="flow-tag">ContextDataRepository</span>
+                            <span class="flow-tag">@Query JPQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-timeline">
+                        <div class="flow-dot"></div>
+                    </div>
+                    <div class="flow-content">
+                        <div class="flow-title">Context-Aware Edge Weights</div>
+                        <div class="flow-desc">A* algorithm uses f(n) = g(n) + h(n) with custom edge costs. Each edge dynamically queries the database based on user preferences to compute weighted cost.</div>
+                        <div class="flow-tags">
+                            <span class="flow-tag">Edge.getWeightedCost()</span>
+                            <span class="flow-tag">AStarRouter.java</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Data Sources -->
+    <div class="arch-panel">
+        <div class="arch-header">
+            <div class="arch-header-icon" style="background: rgba(234,179,8,0.12); color: #fde047;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div class="arch-header-text">Raw Data Sources</div>
+        </div>
+        <div class="arch-body">
+            <div class="sources-grid">
+                <div class="source-row">
+                    <div class="source-icon-wrap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="source-info">
+                        <div class="source-name">Crime Incidents</div>
+                        <div class="source-detail">Toronto Police Service Open Data</div>
+                    </div>
+                    <span class="source-format format-csv">CSV</span>
+                    <div class="source-records">~310K rows</div>
+                </div>
+
+                <div class="source-row">
+                    <div class="source-icon-wrap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                    </div>
+                    <div class="source-info">
+                        <div class="source-name">Street Lights</div>
+                        <div class="source-detail">Toronto Open Data Portal</div>
+                    </div>
+                    <span class="source-format format-csv">CSV</span>
+                    <div class="source-records">~226K rows</div>
+                </div>
+
+                <div class="source-row">
+                    <div class="source-icon-wrap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="source-info">
+                        <div class="source-name">Road Restrictions</div>
+                        <div class="source-detail">Toronto Open Data — Construction permits</div>
+                    </div>
+                    <span class="source-format format-geojson">GeoJSON</span>
+                    <div class="source-records">~1.2K rows</div>
+                </div>
+
+                <div class="source-row">
+                    <div class="source-icon-wrap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="source-info">
+                        <div class="source-name">Health Services</div>
+                        <div class="source-detail">Toronto Open Data — Hospitals & clinics</div>
+                    </div>
+                    <span class="source-format format-csv">CSV</span>
+                    <div class="source-records">~350 rows</div>
+                </div>
+
+                <div class="source-row">
+                    <div class="source-icon-wrap">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </div>
+                    <div class="source-info">
+                        <div class="source-name">OSM Road Network</div>
+                        <div class="source-detail">Geofabrik — Ontario extract</div>
+                    </div>
+                    <span class="source-format format-pbf">PBF</span>
+                    <div class="source-records">~200 MB</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Challenges -->
+<div class="section-label">Key Challenges & Solutions</div>
+<div class="challenges-grid">
+    <div class="challenge-card">
+        <div class="challenge-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <div class="challenge-label">Challenge</div>
+        <div class="challenge-title">Multi-Format Data Integration</div>
+        <div class="challenge-desc">Merging 5 disparate data sources with different coordinate systems, schemas, and encodings into a unified queryable format was the biggest technical hurdle.</div>
+        <div class="challenge-solution">
+            <div class="solution-label">Solution</div>
+            <div class="solution-text">Built a unified ContextDataLoader with format-specific parsers (Commons CSV, Jackson GeoJSON). Robust error handling skips corrupted rows without failing the entire load.</div>
+        </div>
+    </div>
+
+    <div class="challenge-card">
+        <div class="challenge-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="challenge-label">Challenge</div>
+        <div class="challenge-title">Real-Time Query Performance</div>
+        <div class="challenge-desc">The A* algorithm queries the database for every edge evaluation. With thousands of edges per route calculation, naive queries caused unacceptable latency.</div>
+        <div class="challenge-solution">
+            <div class="solution-label">Solution</div>
+            <div class="solution-text">Spatial bounding box queries with indexed lat/lng columns. Batch insert optimizations (1000 records) and H2 file-mode persistence avoid reload overhead.</div>
+        </div>
+    </div>
+
+    <div class="challenge-card">
+        <div class="challenge-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="challenge-label">Challenge</div>
+        <div class="challenge-title">Incomplete Data Coverage</div>
+        <div class="challenge-desc">Not all streets in Toronto have crime stats, lighting data, or surface information. Missing data could produce inaccurate or broken routes.</div>
+        <div class="challenge-solution">
+            <div class="solution-label">Solution</div>
+            <div class="solution-text">Graceful degradation: when context data is unavailable for a segment, the system falls back to distance-based routing. Default neutral scores prevent bias.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Handling -->
+<div class="section-label">Graceful Error Handling</div>
+<div class="error-section">
+    <div class="error-mockup">
+        <div class="error-browser-bar">
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-dot"></div>
+            <div class="browser-url">localhost:8080 — Context-Aware Navigation</div>
+        </div>
+        <div class="error-content">
+            <div class="error-icon-big">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="error-title">Limited Data for This Area</div>
+            <div class="error-detail">
+                Street lighting and crime data is unavailable for the selected route segment. The system will calculate a standard distance-based route instead.
+            </div>
+            <div class="error-actions">
+                <button class="error-btn primary">Use Standard Route</button>
+                <button class="error-btn secondary">Try Different Route</button>
+            </div>
+        </div>
+    </div>
+    <div class="error-note">
+        <strong>Lesson Learned:</strong> Designing for incomplete data from the start was critical. Instead of blocking the user when context data is missing, the application gracefully degrades to standard routing. This ensures the app remains fully functional even with gaps in the Toronto Open Data coverage.
+    </div>
+</div>
+
+</body>
+</html>

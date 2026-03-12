@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard 1: Web Application Overview</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f13;
+            color: #e4e4e7;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            padding: 48px 60px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: #94a3b8;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .team-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .team-tag svg { opacity: 0.5; }
+
+        .app-wireframe {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            height: calc(100vh - 180px);
+            min-height: 600px;
+        }
+
+        /* --- Left Panel --- */
+        .control-panel {
+            background: #18181b;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            padding: 24px 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .panel-section:last-child { border-bottom: none; }
+
+        .panel-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #71717a;
+            margin-bottom: 16px;
+        }
+
+        .search-box {
+            width: 100%;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 10px;
+            padding: 12px 14px 12px 40px;
+            color: #e4e4e7;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            position: relative;
+        }
+
+        .search-box:focus { border-color: #6366f1; }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #71717a;
+        }
+
+        .location-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .location-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 10px;
+            padding: 12px 14px;
+            transition: border-color 0.2s;
+        }
+
+        .location-field:focus-within { border-color: #6366f1; }
+
+        .location-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dot-start { background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+        .dot-end { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+
+        .location-field input {
+            background: none;
+            border: none;
+            color: #e4e4e7;
+            font-size: 13px;
+            font-family: inherit;
+            width: 100%;
+            outline: none;
+        }
+
+        .location-field input::placeholder { color: #52525b; }
+
+        .connector-line {
+            width: 1px;
+            height: 12px;
+            background: #3f3f46;
+            margin-left: 18px;
+        }
+
+        /* Toggle Items */
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .toggle-item:last-child { border-bottom: none; }
+
+        .toggle-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toggle-icon.wheelchair { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .toggle-icon.safety { background: rgba(234,179,8,0.15); color: #facc15; }
+        .toggle-icon.construction { background: rgba(249,115,22,0.15); color: #fb923c; }
+        .toggle-icon.hospital { background: rgba(239,68,68,0.15); color: #f87171; }
+        .toggle-icon.bike { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+        .toggle-text strong {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 2px;
+        }
+
+        .toggle-text span {
+            font-size: 11px;
+            color: #71717a;
+        }
+
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background: #3f3f46;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch.on { background: #6366f1; }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .toggle-switch.on::after { transform: translateX(20px); }
+
+        .route-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            letter-spacing: 0.3px;
+        }
+
+        .route-btn:hover { opacity: 0.9; }
+        .route-btn:active { transform: scale(0.98); }
+
+        /* --- Map Area --- */
+        .map-area {
+            position: relative;
+            background: #1a1a2e;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-legend {
+            position: absolute;
+            bottom: 32px;
+            left: 32px;
+            background: rgba(24,24,27,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px 24px;
+            z-index: 1000;
+            min-width: 220px;
+        }
+
+        .legend-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #71717a;
+            margin-bottom: 14px;
+        }
+
+        .legend-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #d4d4d8;
+        }
+
+        .legend-row:last-child { margin-bottom: 0; }
+
+        .legend-line {
+            width: 28px;
+            height: 4px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .legend-line.dashed {
+            background: repeating-linear-gradient(
+                90deg,
+                currentColor 0px,
+                currentColor 6px,
+                transparent 6px,
+                transparent 10px
+            );
+            height: 3px;
+        }
+
+        .map-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(24,24,27,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px 20px;
+            z-index: 1000;
+            font-size: 13px;
+            color: #a1a1aa;
+        }
+
+        .map-info strong {
+            color: #e4e4e7;
+            font-weight: 600;
+        }
+
+        /* Leaflet overrides for dark theme */
+        .leaflet-tile-pane { filter: brightness(0.7) contrast(1.1) saturate(0.3); }
+        .leaflet-control-zoom a {
+            background: #27272a !important;
+            color: #e4e4e7 !important;
+            border-color: #3f3f46 !important;
+        }
+        .leaflet-control-attribution { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Storyboard 1
+    </div>
+    <h1>Web Application Overview</h1>
+    <p>Main interface wireframe — Appsmith + Leaflet.js map with context-aware route preferences</p>
+    <div class="team-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Arshia / Andrew / Dunny
+    </div>
+</div>
+
+<div class="app-wireframe">
+    <!-- Left Control Panel -->
+    <div class="control-panel">
+        <div class="panel-section">
+            <div class="panel-label">Route</div>
+            <div class="location-inputs">
+                <div class="location-field">
+                    <div class="location-dot dot-start"></div>
+                    <input type="text" value="University of Toronto, St. George" readonly placeholder="Start location">
+                </div>
+                <div class="connector-line"></div>
+                <div class="location-field">
+                    <div class="location-dot dot-end"></div>
+                    <input type="text" value="CN Tower, Toronto" readonly placeholder="Destination">
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <div class="panel-label">Preferences</div>
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <div class="toggle-icon wheelchair">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9 12h6M12 9v6"/></svg>
+                    </div>
+                    <div class="toggle-text">
+                        <strong>Wheelchair Accessible</strong>
+                        <span>Ramps, curb cuts, smooth surfaces</span>
+                    </div>
+                </div>
+                <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <div class="toggle-icon safety">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="toggle-text">
+                        <strong>Safety Priority</strong>
+                        <span>Well-lit streets, low crime areas</span>
+                    </div>
+                </div>
+                <div class="toggle-switch on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <div class="toggle-icon construction">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
+                    </div>
+                    <div class="toggle-text">
+                        <strong>Avoid Construction</strong>
+                        <span>Bypass active road work zones</span>
+                    </div>
+                </div>
+                <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <div class="toggle-icon hospital">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    </div>
+                    <div class="toggle-text">
+                        <strong>Near Hospitals</strong>
+                        <span>Stay within 1 km of medical services</span>
+                    </div>
+                </div>
+                <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-item">
+                <div class="toggle-info">
+                    <div class="toggle-icon bike">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-3 11.5V14l-3-3 4-3 2 3h2"/></svg>
+                    </div>
+                    <div class="toggle-text">
+                        <strong>Prefer Bike Lanes</strong>
+                        <span>Protected cycling infrastructure</span>
+                    </div>
+                </div>
+                <div class="toggle-switch" onclick="this.classList.toggle('on')"></div>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <button class="route-btn">Calculate Routes</button>
+        </div>
+    </div>
+
+    <!-- Map Area -->
+    <div class="map-area">
+        <div id="map"></div>
+
+        <div class="map-legend">
+            <div class="legend-title">Route Options</div>
+            <div class="legend-row">
+                <div class="legend-line" style="background: #ef4444;"></div>
+                <span>Shortest Route — 1.2 km, 15 min</span>
+            </div>
+            <div class="legend-row">
+                <div class="legend-line" style="background: #3b82f6;"></div>
+                <span>Balanced Route — 1.5 km, 19 min</span>
+            </div>
+            <div class="legend-row">
+                <div class="legend-line" style="background: #22c55e;"></div>
+                <span>Accessible Route — 1.8 km, 22 min</span>
+            </div>
+        </div>
+
+        <div class="map-info">
+            <strong>Greater Toronto Area</strong><br>
+            Context-Aware Inclusive Navigation
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Leaflet map centered on downtown Toronto
+    const map = L.map('map', {
+        zoomControl: true,
+        attributionControl: false
+    }).setView([43.655, -79.385], 14);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    // Remove tile filter since we're using a dark tile layer
+    document.querySelector('.leaflet-tile-pane').style.filter = 'none';
+
+    // Route 1: Shortest (red) — goes through potentially unsafe area
+    const route1 = [
+        [43.6629, -79.3957], // UofT
+        [43.6610, -79.3920],
+        [43.6590, -79.3885],
+        [43.6565, -79.3860],
+        [43.6540, -79.3845],
+        [43.6510, -79.3838],
+        [43.6485, -79.3832],
+        [43.6426, -79.3871]  // CN Tower
+    ];
+
+    // Route 2: Balanced (blue) — moderate detour
+    const route2 = [
+        [43.6629, -79.3957],
+        [43.6615, -79.3940],
+        [43.6600, -79.3910],
+        [43.6580, -79.3880],
+        [43.6555, -79.3870],
+        [43.6530, -79.3860],
+        [43.6500, -79.3855],
+        [43.6470, -79.3860],
+        [43.6426, -79.3871]
+    ];
+
+    // Route 3: Accessible (green) — avoids stairs, uses ramps
+    const route3 = [
+        [43.6629, -79.3957],
+        [43.6620, -79.3970],
+        [43.6605, -79.3960],
+        [43.6585, -79.3940],
+        [43.6560, -79.3920],
+        [43.6535, -79.3910],
+        [43.6510, -79.3900],
+        [43.6480, -79.3890],
+        [43.6450, -79.3880],
+        [43.6426, -79.3871]
+    ];
+
+    L.polyline(route1, { color: '#ef4444', weight: 5, opacity: 0.85, dashArray: '10, 8' }).addTo(map);
+    L.polyline(route2, { color: '#3b82f6', weight: 5, opacity: 0.85 }).addTo(map);
+    L.polyline(route3, { color: '#22c55e', weight: 5, opacity: 0.85, dashArray: '8, 6' }).addTo(map);
+
+    // Start marker
+    const startIcon = L.divIcon({
+        html: '<div style="width:16px;height:16px;background:#22c55e;border:3px solid white;border-radius:50%;box-shadow:0 0 12px rgba(34,197,94,0.6);"></div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+        className: ''
+    });
+
+    // End marker
+    const endIcon = L.divIcon({
+        html: '<div style="width:16px;height:16px;background:#ef4444;border:3px solid white;border-radius:50%;box-shadow:0 0 12px rgba(239,68,68,0.6);"></div>',
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
+        className: ''
+    });
+
+    L.marker([43.6629, -79.3957], { icon: startIcon }).addTo(map).bindPopup('<b>Start:</b> University of Toronto');
+    L.marker([43.6426, -79.3871], { icon: endIcon }).addTo(map).bindPopup('<b>End:</b> CN Tower');
+
+    // Hospital marker
+    const hospitalIcon = L.divIcon({
+        html: '<div style="width:28px;height:28px;background:rgba(239,68,68,0.9);border:2px solid white;border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg></div>',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+        className: ''
+    });
+    L.marker([43.6560, -79.3860], { icon: hospitalIcon }).addTo(map).bindPopup('<b>Toronto General Hospital</b><br>0.4 km from route');
+
+    // Construction zone
+    L.circle([43.6580, -79.3835], {
+        radius: 80,
+        color: '#f97316',
+        fillColor: '#f97316',
+        fillOpacity: 0.15,
+        weight: 2,
+        dashArray: '6, 4'
+    }).addTo(map).bindPopup('<b>Active Construction Zone</b><br>Road work until March 2026');
+
+    // Fit bounds
+    map.fitBounds([
+        [43.6630, -79.3975],
+        [43.6420, -79.3820]
+    ], { padding: [40, 40] });
+</script>
+
+</body>
+</html>

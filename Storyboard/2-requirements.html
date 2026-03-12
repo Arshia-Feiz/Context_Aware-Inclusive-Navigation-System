@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard 2: Requirements and Use Cases</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f13;
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 48px 60px;
+        }
+
+        .page-header {
+            margin-bottom: 48px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .team-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* --- User Profiles Section --- */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #71717a;
+            margin-bottom: 20px;
+        }
+
+        .user-profiles {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .user-card {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 28px 24px;
+            transition: border-color 0.3s, transform 0.2s;
+            cursor: default;
+        }
+
+        .user-card:hover {
+            border-color: rgba(99,102,241,0.3);
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+
+        .user-card:nth-child(1) .user-avatar { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .user-card:nth-child(2) .user-avatar { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .user-card:nth-child(3) .user-avatar { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .user-card:nth-child(4) .user-avatar { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .user-scenario {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        .user-needs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .need-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .user-card:nth-child(1) .need-tag { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); }
+        .user-card:nth-child(2) .need-tag { background: rgba(234,179,8,0.12); color: #facc15; border: 1px solid rgba(234,179,8,0.2); }
+        .user-card:nth-child(3) .need-tag { background: rgba(249,115,22,0.12); color: #fb923c; border: 1px solid rgba(249,115,22,0.2); }
+        .user-card:nth-child(4) .need-tag { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+
+        /* --- Mapping Matrix --- */
+        .matrix {
+            display: grid;
+            grid-template-columns: 220px repeat(3, 1fr);
+            gap: 1px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .matrix-cell {
+            background: #18181b;
+            padding: 22px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .matrix-header {
+            background: #1e1e24;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #71717a;
+        }
+
+        .matrix-header .cell-title {
+            color: #a1a1aa;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: none;
+            letter-spacing: 0;
+            margin-bottom: 4px;
+        }
+
+        .matrix-header .cell-sub {
+            font-size: 11px;
+            color: #52525b;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .matrix-row-header {
+            background: #1a1a20;
+        }
+
+        .row-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .row-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .row-label-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d4d4d8;
+        }
+
+        .row-label-sub {
+            font-size: 11px;
+            color: #52525b;
+            margin-top: 2px;
+        }
+
+        .api-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.2);
+            color: #a5b4fc;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            margin-bottom: 8px;
+        }
+
+        .cell-desc {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.5;
+        }
+
+        .check-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: rgba(34,197,94,0.15);
+            border-radius: 50%;
+            margin-bottom: 8px;
+        }
+
+        .data-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: #52525b;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        /* --- Data Sources Footer --- */
+        .data-sources {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .source-card {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .source-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .source-card:nth-child(1) .source-icon { background: rgba(59,130,246,0.15); color: #60a5fa; }
+        .source-card:nth-child(2) .source-icon { background: rgba(234,179,8,0.15); color: #facc15; }
+        .source-card:nth-child(3) .source-icon { background: rgba(239,68,68,0.15); color: #f87171; }
+
+        .source-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d4d4d8;
+            margin-bottom: 2px;
+        }
+
+        .source-url {
+            font-size: 11px;
+            color: #52525b;
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Storyboard 2
+    </div>
+    <h1>Requirements & Use Cases</h1>
+    <p>Mapping user profiles to system capabilities, API endpoints, and data layers</p>
+    <div class="team-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Ivan / Maria
+    </div>
+</div>
+
+<!-- User Profiles -->
+<div class="section-label">User Profiles</div>
+<div class="user-profiles">
+    <div class="user-card">
+        <div class="user-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        </div>
+        <div class="user-name">Wheelchair User</div>
+        <div class="user-scenario">Needs step-free routes with smooth surfaces, ramps, and curb cuts to navigate safely across downtown Toronto.</div>
+        <div class="user-needs">
+            <span class="need-tag">Ramps</span>
+            <span class="need-tag">Curb cuts</span>
+            <span class="need-tag">Smooth surface</span>
+        </div>
+    </div>
+
+    <div class="user-card">
+        <div class="user-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </div>
+        <div class="user-name">Student (Night Walk)</div>
+        <div class="user-scenario">Walking home from campus late at night — needs well-lit streets and areas with low crime rates for peace of mind.</div>
+        <div class="user-needs">
+            <span class="need-tag">Street lighting</span>
+            <span class="need-tag">Low crime</span>
+            <span class="need-tag">24h stores</span>
+        </div>
+    </div>
+
+    <div class="user-card">
+        <div class="user-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="user-name">Daily Commuter</div>
+        <div class="user-scenario">Walks or bikes to work daily — wants to avoid active construction zones and road closures that disrupt the usual route.</div>
+        <div class="user-needs">
+            <span class="need-tag">No construction</span>
+            <span class="need-tag">Bike lanes</span>
+            <span class="need-tag">Fast routes</span>
+        </div>
+    </div>
+
+    <div class="user-card">
+        <div class="user-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="user-name">Medical Needs</div>
+        <div class="user-scenario">Has a medical condition requiring proximity to hospitals or clinics — route must stay within a safe distance of emergency services.</div>
+        <div class="user-needs">
+            <span class="need-tag">Nearby hospitals</span>
+            <span class="need-tag">Emergency access</span>
+        </div>
+    </div>
+</div>
+
+<!-- Capabilities Matrix -->
+<div class="section-label">Capabilities Matrix</div>
+<div class="matrix">
+    <!-- Header row -->
+    <div class="matrix-cell matrix-header"></div>
+    <div class="matrix-cell matrix-header">
+        <div class="cell-title">Custom Route Calculation</div>
+        <div class="cell-sub">POST /api/route</div>
+    </div>
+    <div class="matrix-cell matrix-header">
+        <div class="cell-title">User Preferences</div>
+        <div class="cell-sub">GET/PUT /api/preferences</div>
+    </div>
+    <div class="matrix-cell matrix-header">
+        <div class="cell-title">Nearby Services</div>
+        <div class="cell-sub">GET /api/pois</div>
+    </div>
+
+    <!-- Wheelchair row -->
+    <div class="matrix-cell matrix-row-header">
+        <div class="row-label">
+            <div class="row-dot" style="background: #3b82f6;"></div>
+            <div>
+                <div class="row-label-text">Wheelchair User</div>
+                <div class="row-label-sub">Accessibility-first routing</div>
+            </div>
+        </div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/route</div>
+        <div class="cell-desc">Avoids stairs, prioritizes ramps and smooth surfaces. Edge weights penalize inaccessible segments.</div>
+        <div class="data-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> OSM wheelchair tags, surface data</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/preferences</div>
+        <div class="cell-desc">wheelchairAccessible: true<br>Saved per user session</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/pois</div>
+        <div class="cell-desc">Find accessible washrooms, ramps, and nearby transit</div>
+    </div>
+
+    <!-- Night Walker row -->
+    <div class="matrix-cell matrix-row-header">
+        <div class="row-label">
+            <div class="row-dot" style="background: #eab308;"></div>
+            <div>
+                <div class="row-label-text">Night Walker</div>
+                <div class="row-label-sub">Safety-optimized routing</div>
+            </div>
+        </div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/route</div>
+        <div class="cell-desc">Routes through well-lit, low-crime streets. Crime score and lighting data weigh edge costs.</div>
+        <div class="data-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Toronto Police + Street Lights data</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/preferences</div>
+        <div class="cell-desc">preferLitStreets: true<br>avoidHighCrime: true<br>timeOfDay: 22</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/pois</div>
+        <div class="cell-desc">Locate 24-hour convenience stores and emergency services along the route</div>
+    </div>
+
+    <!-- Commuter row -->
+    <div class="matrix-cell matrix-row-header">
+        <div class="row-label">
+            <div class="row-dot" style="background: #f97316;"></div>
+            <div>
+                <div class="row-label-text">Commuter</div>
+                <div class="row-label-sub">Obstruction-free routing</div>
+            </div>
+        </div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/route</div>
+        <div class="cell-desc">Bypasses active construction zones. Real-time checks against ConstructionProject table.</div>
+        <div class="data-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Toronto Open Data road restrictions</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/preferences</div>
+        <div class="cell-desc">avoidConstruction: true<br>Automatically updated from city data</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/pois</div>
+        <div class="cell-desc">Show alternative paths and bike-friendly detours near construction zones</div>
+    </div>
+
+    <!-- Medical row -->
+    <div class="matrix-cell matrix-row-header">
+        <div class="row-label">
+            <div class="row-dot" style="background: #ef4444;"></div>
+            <div>
+                <div class="row-label-text">Medical Needs</div>
+                <div class="row-label-sub">Hospital-proximity routing</div>
+            </div>
+        </div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/route</div>
+        <div class="cell-desc">Routes stay within maxDistanceToHospital. Edge weights increase with distance from nearest health service.</div>
+        <div class="data-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Toronto Open Data health services</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/preferences</div>
+        <div class="cell-desc">maxDistanceToHospital: 1000m<br>Critical for route planning</div>
+    </div>
+    <div class="matrix-cell">
+        <div class="check-icon"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div class="api-badge">/api/pois</div>
+        <div class="cell-desc">Display nearest hospitals, walk-in clinics, and pharmacies with distance info</div>
+    </div>
+</div>
+
+<!-- Data Sources -->
+<div style="margin-top: 40px;">
+    <div class="section-label">Data Sources</div>
+    <div class="data-sources">
+        <div class="source-card">
+            <div class="source-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div>
+                <div class="source-name">OpenStreetMap (Geofabrik)</div>
+                <div class="source-url">Road network, sidewalks, surface types</div>
+            </div>
+        </div>
+        <div class="source-card">
+            <div class="source-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+                <div class="source-name">Toronto Police Open Data</div>
+                <div class="source-url">Crime incident records with geolocation</div>
+            </div>
+        </div>
+        <div class="source-card">
+            <div class="source-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            </div>
+            <div>
+                <div class="source-name">Toronto Open Data Portal</div>
+                <div class="source-url">Street lights, construction, health services, cycling</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard 4: Quality Control & Testing</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f13;
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 48px 60px;
+        }
+
+        .page-header { margin-bottom: 40px; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p { color: #94a3b8; font-size: 16px; }
+
+        .team-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #71717a;
+            margin-bottom: 20px;
+        }
+
+        /* --- Testing Pipeline --- */
+        .pipeline {
+            display: flex;
+            gap: 0;
+            margin-bottom: 48px;
+        }
+
+        .pipeline-stage {
+            flex: 1;
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 28px 24px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pipeline-stage:first-child {
+            border-radius: 16px 0 0 16px;
+        }
+
+        .pipeline-stage:last-child {
+            border-radius: 0 16px 16px 0;
+        }
+
+        .pipeline-stage + .pipeline-stage {
+            border-left: none;
+        }
+
+        .pipeline-connector {
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            width: 24px;
+            height: 24px;
+            background: #27272a;
+            border: 2px solid #3f3f46;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pipeline-stage:last-child .pipeline-connector { display: none; }
+
+        .stage-icon-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .pipeline-stage:nth-child(1) .stage-icon-wrap { background: rgba(249,115,22,0.12); color: #fb923c; }
+        .pipeline-stage:nth-child(2) .stage-icon-wrap { background: rgba(59,130,246,0.12); color: #60a5fa; }
+        .pipeline-stage:nth-child(3) .stage-icon-wrap { background: rgba(168,85,247,0.12); color: #c084fc; }
+        .pipeline-stage:nth-child(4) .stage-icon-wrap { background: rgba(34,197,94,0.12); color: #4ade80; }
+
+        .stage-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .stage-desc {
+            font-size: 12px;
+            color: #71717a;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .stage-tests {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .test-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            margin-bottom: 6px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .test-line:last-child { margin-bottom: 0; }
+
+        .test-pass {
+            color: #22c55e;
+        }
+
+        .test-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .test-pass .test-dot { background: #22c55e; }
+
+        /* --- Route Comparison --- */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .comp-panel {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .comp-header {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .comp-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comp-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .comp-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+
+        .comp-badge {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .comp-badge.fail {
+            background: rgba(239,68,68,0.12);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+
+        .comp-badge.pass {
+            background: rgba(34,197,94,0.12);
+            color: #4ade80;
+            border: 1px solid rgba(34,197,94,0.2);
+        }
+
+        .comp-map {
+            height: 340px;
+            position: relative;
+        }
+
+        .comp-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comp-footer.fail { color: #f87171; }
+        .comp-footer.pass { color: #4ade80; }
+
+        .comp-metric {
+            display: flex;
+            gap: 20px;
+            padding: 12px 24px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .metric {
+            font-size: 11px;
+            color: #52525b;
+        }
+
+        .metric strong {
+            color: #a1a1aa;
+            font-weight: 600;
+        }
+
+        /* Leaflet dark theme */
+        .leaflet-tile-pane { filter: none; }
+        .leaflet-control-zoom a {
+            background: #27272a !important;
+            color: #e4e4e7 !important;
+            border-color: #3f3f46 !important;
+        }
+        .leaflet-control-attribution { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Storyboard 4
+    </div>
+    <h1>Quality Control & Testing</h1>
+    <p>Testing pipeline workflow and side-by-side route validation</p>
+    <div class="team-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Thomas / Hamad
+    </div>
+</div>
+
+<!-- Testing Pipeline -->
+<div class="section-label">Testing Pipeline</div>
+<div class="pipeline">
+    <div class="pipeline-stage">
+        <div class="stage-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stage-title">Unit Tests</div>
+        <div class="stage-desc">Java Spring Boot backend: A* algorithm correctness, edge weight calculations, Haversine distance formula</div>
+        <div class="stage-tests">
+            <div class="test-line test-pass"><div class="test-dot"></div>AStarRouterTest.findPath()</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>Edge.getWeightedCost()</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>Graph.haversineDistance()</div>
+        </div>
+        <div class="pipeline-connector">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+    </div>
+
+    <div class="pipeline-stage">
+        <div class="stage-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        </div>
+        <div class="stage-title">Database Verification</div>
+        <div class="stage-desc">H2 embedded database: CSV data loading, spatial bounding box queries, context data accuracy and integrity</div>
+        <div class="stage-tests">
+            <div class="test-line test-pass"><div class="test-dot"></div>ContextDataLoader.load()</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>CrimeRepo.boundingBox()</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>StreetLightRepo.find()</div>
+        </div>
+        <div class="pipeline-connector">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+    </div>
+
+    <div class="pipeline-stage">
+        <div class="stage-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        </div>
+        <div class="stage-title">Integration & Docker</div>
+        <div class="stage-desc">docker-compose up: Container orchestration, service health checks, REST API endpoint validation</div>
+        <div class="stage-tests">
+            <div class="test-line test-pass"><div class="test-dot"></div>docker-compose up --build</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>GET /api/health → 200</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>POST /api/route → valid</div>
+        </div>
+        <div class="pipeline-connector">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+    </div>
+
+    <div class="pipeline-stage">
+        <div class="stage-icon-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stage-title">End-to-End</div>
+        <div class="stage-desc">Full user flow: preferences → route calculation → map rendering with real data and context-aware weights</div>
+        <div class="stage-tests">
+            <div class="test-line test-pass"><div class="test-dot"></div>Wheelchair route avoids stairs</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>Night route prefers lit streets</div>
+            <div class="test-line test-pass"><div class="test-dot"></div>Map renders 3 route options</div>
+        </div>
+    </div>
+</div>
+
+<!-- Route Comparison -->
+<div class="section-label">Test Case: Route Comparison — Wheelchair Accessibility</div>
+<div class="comparison">
+    <!-- Standard Route -->
+    <div class="comp-panel">
+        <div class="comp-header">
+            <div class="comp-header-left">
+                <div class="comp-dot" style="background: #ef4444;"></div>
+                <div class="comp-title">Standard Shortest Route</div>
+            </div>
+            <div class="comp-badge fail">FAILS ACCESSIBILITY</div>
+        </div>
+        <div class="comp-map" id="map-standard"></div>
+        <div class="comp-metric">
+            <div class="metric"><strong>0.9 km</strong> distance</div>
+            <div class="metric"><strong>11 min</strong> walking</div>
+            <div class="metric"><strong>1</strong> staircase</div>
+        </div>
+        <div class="comp-footer fail">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            Route crosses inaccessible staircase — not wheelchair safe
+        </div>
+    </div>
+
+    <!-- Weighted Route -->
+    <div class="comp-panel">
+        <div class="comp-header">
+            <div class="comp-header-left">
+                <div class="comp-dot" style="background: #22c55e;"></div>
+                <div class="comp-title">Accessibility-Weighted Route</div>
+            </div>
+            <div class="comp-badge pass">PASSES</div>
+        </div>
+        <div class="comp-map" id="map-weighted"></div>
+        <div class="comp-metric">
+            <div class="metric"><strong>1.2 km</strong> distance</div>
+            <div class="metric"><strong>15 min</strong> walking</div>
+            <div class="metric"><strong>0</strong> obstacles</div>
+        </div>
+        <div class="comp-footer pass">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Uses ramp and smooth sidewalk — fully accessible path
+        </div>
+    </div>
+</div>
+
+<script>
+    // Shared obstacle location (staircase)
+    const staircaseLat = 43.6595;
+    const staircaseLng = -79.3900;
+
+    function createMap(id) {
+        const m = L.map(id, { zoomControl: false, attributionControl: false }).setView([43.660, -79.392], 15);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(m);
+        return m;
+    }
+
+    // --- Standard Route Map ---
+    const mapStd = createMap('map-standard');
+
+    const stdRoute = [
+        [43.6635, -79.3960],
+        [43.6620, -79.3940],
+        [43.6605, -79.3920],
+        [43.6595, -79.3900], // through staircase
+        [43.6580, -79.3880],
+        [43.6565, -79.3865]
+    ];
+
+    L.polyline(stdRoute, { color: '#ef4444', weight: 5, opacity: 0.8 }).addTo(mapStd);
+
+    // Staircase obstacle
+    L.circle([staircaseLat, staircaseLng], {
+        radius: 40,
+        color: '#ef4444',
+        fillColor: '#ef4444',
+        fillOpacity: 0.2,
+        weight: 2,
+        dashArray: '5, 5'
+    }).addTo(mapStd);
+
+    const obstacleIcon = L.divIcon({
+        html: '<div style="width:30px;height:30px;background:rgba(239,68,68,0.9);border:2px solid white;border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></div>',
+        iconSize: [30, 30], iconAnchor: [15, 15], className: ''
+    });
+    L.marker([staircaseLat, staircaseLng], { icon: obstacleIcon }).addTo(mapStd).bindPopup('<b>Staircase</b><br>Not wheelchair accessible');
+
+    // Start/End markers (standard)
+    const mkStart = (m, pos) => {
+        const icon = L.divIcon({
+            html: '<div style="width:14px;height:14px;background:#22c55e;border:3px solid white;border-radius:50%;box-shadow:0 0 10px rgba(34,197,94,0.5);"></div>',
+            iconSize: [14, 14], iconAnchor: [7, 7], className: ''
+        });
+        L.marker(pos, { icon }).addTo(m);
+    };
+    const mkEnd = (m, pos) => {
+        const icon = L.divIcon({
+            html: '<div style="width:14px;height:14px;background:#ef4444;border:3px solid white;border-radius:50%;box-shadow:0 0 10px rgba(239,68,68,0.5);"></div>',
+            iconSize: [14, 14], iconAnchor: [7, 7], className: ''
+        });
+        L.marker(pos, { icon }).addTo(m);
+    };
+
+    mkStart(mapStd, [43.6635, -79.3960]);
+    mkEnd(mapStd, [43.6565, -79.3865]);
+    mapStd.fitBounds([[43.6640, -79.3970], [43.6560, -79.3855]], { padding: [30, 30] });
+
+    // --- Weighted Route Map ---
+    const mapWt = createMap('map-weighted');
+
+    const wtRoute = [
+        [43.6635, -79.3960],
+        [43.6625, -79.3950],
+        [43.6618, -79.3935],
+        [43.6612, -79.3918],
+        [43.6605, -79.3905],
+        [43.6598, -79.3890],
+        [43.6588, -79.3878],
+        [43.6578, -79.3870],
+        [43.6565, -79.3865]
+    ];
+
+    L.polyline(wtRoute, { color: '#22c55e', weight: 5, opacity: 0.8 }).addTo(mapWt);
+
+    // Same staircase shown but avoided
+    L.circle([staircaseLat, staircaseLng], {
+        radius: 40,
+        color: '#ef4444',
+        fillColor: '#ef4444',
+        fillOpacity: 0.1,
+        weight: 1,
+        dashArray: '5, 5'
+    }).addTo(mapWt);
+
+    const avoidIcon = L.divIcon({
+        html: '<div style="width:30px;height:30px;background:rgba(63,63,70,0.9);border:2px solid #52525b;border-radius:8px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></div>',
+        iconSize: [30, 30], iconAnchor: [15, 15], className: ''
+    });
+    L.marker([staircaseLat, staircaseLng], { icon: avoidIcon }).addTo(mapWt).bindPopup('<b>Staircase (Avoided)</b><br>Route uses ramp instead');
+
+    // Ramp marker
+    const rampIcon = L.divIcon({
+        html: '<div style="width:28px;height:28px;background:rgba(34,197,94,0.9);border:2px solid white;border-radius:7px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>',
+        iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+    });
+    L.marker([43.6605, -79.3905], { icon: rampIcon }).addTo(mapWt).bindPopup('<b>Accessible Ramp</b><br>Smooth surface, no steps');
+
+    mkStart(mapWt, [43.6635, -79.3960]);
+    mkEnd(mapWt, [43.6565, -79.3865]);
+    mapWt.fitBounds([[43.6640, -79.3970], [43.6560, -79.3855]], { padding: [30, 30] });
+</script>
+
+</body>
+</html>

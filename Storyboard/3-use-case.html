@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard 3: Use Case — Safe Night Navigation</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f13;
+            color: #e4e4e7;
+            min-height: 100vh;
+            padding: 48px 60px;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.3);
+            color: #a5b4fc;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .team-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Scenario Banner */
+        .scenario-banner {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .scenario-icon {
+            width: 56px;
+            height: 56px;
+            background: rgba(99,102,241,0.2);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .scenario-text h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #c7d2fe;
+            margin-bottom: 4px;
+        }
+
+        .scenario-text p {
+            font-size: 13px;
+            color: #818cf8;
+            line-height: 1.5;
+        }
+
+        /* Steps Layout */
+        .steps-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr;
+            gap: 0;
+            align-items: stretch;
+        }
+
+        .step-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            color: #3f3f46;
+        }
+
+        .step-card {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-top {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .step-num {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-card:nth-child(1) .step-num { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+        .step-card:nth-child(3) .step-num { background: rgba(234,179,8,0.15); color: #fde047; }
+        .step-card:nth-child(5) .step-num { background: rgba(34,197,94,0.15); color: #4ade80; }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e4e4e7;
+        }
+
+        .step-subtitle {
+            font-size: 11px;
+            color: #71717a;
+            margin-top: 2px;
+        }
+
+        .step-body {
+            flex: 1;
+            padding: 0;
+        }
+
+        /* --- Step 1: Phone UI --- */
+        .phone-ui {
+            padding: 24px;
+        }
+
+        .phone-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #27272a;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .phone-time {
+            font-size: 13px;
+            font-weight: 600;
+            color: #d4d4d8;
+        }
+
+        .phone-status {
+            display: flex;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 4px;
+            height: 4px;
+            background: #71717a;
+            border-radius: 50%;
+        }
+
+        .form-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #71717a;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #e4e4e7;
+            font-size: 13px;
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+
+        .pref-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #27272a;
+            border: 1px solid #3f3f46;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .pref-toggle.active {
+            background: rgba(234,179,8,0.08);
+            border-color: rgba(234,179,8,0.3);
+        }
+
+        .pref-toggle-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #d4d4d8;
+        }
+
+        .pref-toggle.active .pref-toggle-text { color: #fde047; }
+
+        .mini-toggle {
+            width: 40px;
+            height: 22px;
+            background: #3f3f46;
+            border-radius: 11px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .mini-toggle::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #71717a;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+
+        .pref-toggle.active .mini-toggle {
+            background: #eab308;
+        }
+
+        .pref-toggle.active .mini-toggle::after {
+            background: white;
+            transform: translateX(18px);
+        }
+
+        .calc-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* --- Step 2: Loading --- */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 420px;
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px solid rgba(99,102,241,0.15);
+            border-radius: 50%;
+            animation: pulse-expand 2s ease-out infinite;
+        }
+
+        .pulse-ring:nth-child(2) { animation-delay: 0.5s; }
+        .pulse-ring:nth-child(3) { animation-delay: 1s; }
+
+        @keyframes pulse-expand {
+            0% { transform: scale(0.5); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .loading-icon {
+            width: 64px;
+            height: 64px;
+            border: 3px solid rgba(99,102,241,0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+            z-index: 1;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 8px;
+            z-index: 1;
+        }
+
+        .loading-sub {
+            font-size: 12px;
+            color: #6366f1;
+            z-index: 1;
+        }
+
+        .loading-steps {
+            margin-top: 32px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .loading-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #71717a;
+        }
+
+        .loading-step.done { color: #22c55e; }
+        .loading-step.active { color: #a5b4fc; }
+
+        .loading-check {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .loading-step.done .loading-check { background: rgba(34,197,94,0.15); }
+        .loading-step.active .loading-check { background: rgba(99,102,241,0.15); animation: blink 1s infinite; }
+        .loading-step:not(.done):not(.active) .loading-check { background: rgba(255,255,255,0.05); }
+
+        @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* --- Step 3: Map Result --- */
+        .result-map-container {
+            height: 100%;
+            min-height: 420px;
+            position: relative;
+        }
+
+        #result-map {
+            width: 100%;
+            height: 100%;
+            min-height: 420px;
+        }
+
+        .result-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .result-badge {
+            background: rgba(34,197,94,0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-stats {
+            background: rgba(24,24,27,0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: #a1a1aa;
+        }
+
+        .result-stats strong {
+            color: #e4e4e7;
+            font-weight: 600;
+        }
+
+        .danger-label {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            z-index: 1000;
+            background: rgba(239,68,68,0.9);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Leaflet dark theme */
+        .leaflet-tile-pane { filter: none; }
+        .leaflet-control-zoom a {
+            background: #27272a !important;
+            color: #e4e4e7 !important;
+            border-color: #3f3f46 !important;
+        }
+        .leaflet-control-attribution { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <div class="badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Storyboard 3
+    </div>
+    <h1>Use Case — Safe Night Navigation</h1>
+    <p>Three-step walkthrough: User input, algorithm processing, and context-aware route result</p>
+    <div class="team-tag">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Simon / Maria
+    </div>
+</div>
+
+<div class="scenario-banner">
+    <div class="scenario-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </div>
+    <div class="scenario-text">
+        <h3>Scenario: A student walks home from campus at 11 PM</h3>
+        <p>The user wants a safe walking route that avoids unlit streets and high-crime areas, while staying close to 24-hour stores and hospitals.</p>
+    </div>
+</div>
+
+<div class="steps-container">
+    <!-- Step 1 -->
+    <div class="step-card">
+        <div class="step-top">
+            <div class="step-num">1</div>
+            <div>
+                <div class="step-title">Enter Destination</div>
+                <div class="step-subtitle">Set safety preferences</div>
+            </div>
+        </div>
+        <div class="step-body">
+            <div class="phone-ui">
+                <div class="phone-header">
+                    <div class="phone-time">11:02 PM</div>
+                    <div class="phone-status">
+                        <div class="status-dot"></div>
+                        <div class="status-dot"></div>
+                        <div class="status-dot"></div>
+                    </div>
+                </div>
+
+                <div class="form-label">Where to?</div>
+                <div class="form-input">742 Spadina Ave, Toronto</div>
+
+                <div class="form-label" style="margin-top: 8px;">Safety Preferences</div>
+
+                <div class="pref-toggle active">
+                    <span class="pref-toggle-text">Street Lighting & Low Crime</span>
+                    <div class="mini-toggle"></div>
+                </div>
+                <div class="pref-toggle active">
+                    <span class="pref-toggle-text">Near 24h Services</span>
+                    <div class="mini-toggle"></div>
+                </div>
+                <div class="pref-toggle">
+                    <span class="pref-toggle-text">Wheelchair Accessible</span>
+                    <div class="mini-toggle"></div>
+                </div>
+                <div class="pref-toggle">
+                    <span class="pref-toggle-text">Avoid Construction</span>
+                    <div class="mini-toggle"></div>
+                </div>
+
+                <button class="calc-btn">Calculate Safe Route</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div class="step-arrow">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step-card">
+        <div class="step-top">
+            <div class="step-num">2</div>
+            <div>
+                <div class="step-title">Algorithm Processing</div>
+                <div class="step-subtitle">Querying A* with context data</div>
+            </div>
+        </div>
+        <div class="step-body">
+            <div class="loading-screen">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="loading-icon"></div>
+                <div class="loading-label">Computing Safe Route</div>
+                <div class="loading-sub">A* Algorithm with context-aware edge weights</div>
+
+                <div class="loading-steps">
+                    <div class="loading-step done">
+                        <div class="loading-check">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                        </div>
+                        Loading road network graph
+                    </div>
+                    <div class="loading-step done">
+                        <div class="loading-check">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+                        </div>
+                        Querying crime incident data
+                    </div>
+                    <div class="loading-step active">
+                        <div class="loading-check">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>
+                        </div>
+                        Checking street light coverage
+                    </div>
+                    <div class="loading-step">
+                        <div class="loading-check"></div>
+                        Calculating weighted edge costs
+                    </div>
+                    <div class="loading-step">
+                        <div class="loading-check"></div>
+                        Finding optimal safe path
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div class="step-arrow">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3f3f46" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step-card">
+        <div class="step-top">
+            <div class="step-num">3</div>
+            <div>
+                <div class="step-title">Safe Route Displayed</div>
+                <div class="step-subtitle">Context-aware result on map</div>
+            </div>
+        </div>
+        <div class="step-body">
+            <div class="result-map-container">
+                <div id="result-map"></div>
+                <div class="result-overlay">
+                    <div class="result-badge">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+                        Safe Route Found
+                    </div>
+                    <div class="result-stats">
+                        <strong>1.4 km</strong> &middot; 18 min walk
+                    </div>
+                </div>
+                <div class="danger-label">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: -1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    Avoided: High-Crime Zone
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Step 3 map
+    const map = L.map('result-map', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([43.662, -79.397], 15);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    // Danger zone (high crime, unlit area)
+    L.circle([43.6605, -79.3940], {
+        radius: 120,
+        color: '#ef4444',
+        fillColor: '#ef4444',
+        fillOpacity: 0.12,
+        weight: 2,
+        dashArray: '6, 4'
+    }).addTo(map);
+
+    // Safe route (green) — detours around danger
+    const safeRoute = [
+        [43.6640, -79.4010],
+        [43.6635, -79.3990],
+        [43.6628, -79.3975],
+        [43.6620, -79.3960],
+        [43.6615, -79.3945],
+        [43.6612, -79.3928],
+        [43.6608, -79.3910],
+        [43.6600, -79.3895],
+        [43.6590, -79.3880],
+        [43.6578, -79.3870],
+        [43.6565, -79.3865],
+        [43.6550, -79.3860]
+    ];
+
+    L.polyline(safeRoute, {
+        color: '#22c55e',
+        weight: 5,
+        opacity: 0.9,
+        lineCap: 'round',
+        lineJoin: 'round'
+    }).addTo(map);
+
+    // Shortest route (red, faded) — goes through danger
+    const unsafeRoute = [
+        [43.6640, -79.4010],
+        [43.6625, -79.3975],
+        [43.6610, -79.3945],
+        [43.6600, -79.3920],
+        [43.6585, -79.3895],
+        [43.6570, -79.3875],
+        [43.6550, -79.3860]
+    ];
+
+    L.polyline(unsafeRoute, {
+        color: '#ef4444',
+        weight: 3,
+        opacity: 0.35,
+        dashArray: '6, 6'
+    }).addTo(map);
+
+    // Start marker
+    const startIcon = L.divIcon({
+        html: '<div style="width:14px;height:14px;background:#22c55e;border:3px solid white;border-radius:50%;box-shadow:0 0 12px rgba(34,197,94,0.6);"></div>',
+        iconSize: [14, 14], iconAnchor: [7, 7], className: ''
+    });
+    L.marker([43.6640, -79.4010], { icon: startIcon }).addTo(map);
+
+    // End marker
+    const endIcon = L.divIcon({
+        html: '<div style="width:14px;height:14px;background:#ef4444;border:3px solid white;border-radius:50%;box-shadow:0 0 12px rgba(239,68,68,0.6);"></div>',
+        iconSize: [14, 14], iconAnchor: [7, 7], className: ''
+    });
+    L.marker([43.6550, -79.3860], { icon: endIcon }).addTo(map);
+
+    // Convenience store marker
+    const storeIcon = L.divIcon({
+        html: '<div style="width:26px;height:26px;background:rgba(59,130,246,0.9);border:2px solid white;border-radius:7px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);font-size:13px;">&#x1f3ea;</div>',
+        iconSize: [26, 26], iconAnchor: [13, 13], className: ''
+    });
+    L.marker([43.6610, -79.3908], { icon: storeIcon }).addTo(map).bindPopup('<b>24h Convenience Store</b><br>Along safe route');
+
+    // Hospital marker
+    const hospitalIcon = L.divIcon({
+        html: '<div style="width:26px;height:26px;background:rgba(239,68,68,0.9);border:2px solid white;border-radius:7px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.3);"><svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z"/></svg></div>',
+        iconSize: [26, 26], iconAnchor: [13, 13], className: ''
+    });
+    L.marker([43.6575, -79.3870], { icon: hospitalIcon }).addTo(map).bindPopup('<b>Hospital</b><br>0.3 km from route');
+
+    // Street light indicators along safe route
+    const lightPositions = [
+        [43.6628, -79.3975], [43.6615, -79.3945], [43.6600, -79.3895], [43.6578, -79.3870]
+    ];
+    lightPositions.forEach(pos => {
+        L.circleMarker(pos, {
+            radius: 4,
+            color: '#fde047',
+            fillColor: '#fde047',
+            fillOpacity: 0.6,
+            weight: 1
+        }).addTo(map);
+    });
+
+    map.fitBounds([
+        [43.6645, -79.4020],
+        [43.6545, -79.3850]
+    ], { padding: [30, 30] });
+</script>
+
+</body>
+</html>

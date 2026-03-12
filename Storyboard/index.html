@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyboard — Context-Aware Navigation System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f13;
+            color: #e4e4e7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle background glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.25);
+            color: #a5b4fc;
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: #71717a;
+            font-size: 17px;
+            max-width: 580px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .hero-meta {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #3f3f46;
+        }
+
+        .hero-meta strong {
+            color: #52525b;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            padding: 32px 28px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            transition: border-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(99,102,241,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card:nth-child(1)::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+        .card:nth-child(2)::before { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+        .card:nth-child(3)::before { background: linear-gradient(90deg, #eab308, #f97316); }
+        .card:nth-child(4)::before { background: linear-gradient(90deg, #22c55e, #14b8a6); }
+        .card:nth-child(5)::before { background: linear-gradient(90deg, #ef4444, #f97316); }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .card-number {
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .card:nth-child(1) .card-number { color: #6366f1; }
+        .card:nth-child(2) .card-number { color: #3b82f6; }
+        .card:nth-child(3) .card-number { color: #eab308; }
+        .card:nth-child(4) .card-number { color: #22c55e; }
+        .card:nth-child(5) .card-number { color: #ef4444; }
+
+        .card-arrow {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+            color: #52525b;
+        }
+
+        .card:hover .card-arrow {
+            background: rgba(99,102,241,0.15);
+            color: #a5b4fc;
+            transform: translateX(3px);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .card-team {
+            font-size: 12px;
+            color: #52525b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: #71717a;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .card-tag {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            color: #71717a;
+            font-weight: 500;
+        }
+
+        .footer {
+            margin-top: 64px;
+            text-align: center;
+            font-size: 12px;
+            color: #27272a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="hero">
+        <div class="hero-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            MIE350 — Group 2
+        </div>
+        <h1>Context-Aware <span>Inclusive</span><br>Navigation System</h1>
+        <p>Storyboard visuals for a navigation platform that prioritizes accessibility, safety, and environmental comfort across the Greater Toronto Area.</p>
+        <div class="hero-meta">
+            <strong>Tech Stack:</strong> Java Spring Boot &middot; H2 Database &middot; A* Algorithm &middot; Appsmith &middot; Leaflet.js &middot; Docker
+        </div>
+    </div>
+
+    <div class="cards">
+        <a href="1-overview.html" class="card">
+            <div class="card-top">
+                <div class="card-number">01</div>
+                <div class="card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+            <div class="card-title">Web Application Overview</div>
+            <div class="card-team">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Arshia / Andrew / Dunny
+            </div>
+            <div class="card-desc">Interactive map wireframe with real Leaflet.js integration, route preference controls, and three distinct color-coded route options across Toronto.</div>
+            <div class="card-tags">
+                <span class="card-tag">Leaflet.js</span>
+                <span class="card-tag">Appsmith</span>
+                <span class="card-tag">Live Map</span>
+            </div>
+        </a>
+
+        <a href="2-requirements.html" class="card">
+            <div class="card-top">
+                <div class="card-number">02</div>
+                <div class="card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+            <div class="card-title">Requirements & Use Cases</div>
+            <div class="card-team">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Ivan / Maria
+            </div>
+            <div class="card-desc">Visual matrix mapping four user profiles to system capabilities, API endpoints, and the specific Toronto Open Data sources that power each feature.</div>
+            <div class="card-tags">
+                <span class="card-tag">User Profiles</span>
+                <span class="card-tag">API Mapping</span>
+                <span class="card-tag">Data Sources</span>
+            </div>
+        </a>
+
+        <a href="3-use-case.html" class="card">
+            <div class="card-top">
+                <div class="card-number">03</div>
+                <div class="card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+            <div class="card-title">Use Case: Safe Night Navigation</div>
+            <div class="card-team">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Simon / Maria
+            </div>
+            <div class="card-desc">Three-step user flow: enter destination with safety preferences, watch the A* algorithm process context data, and see the safe route displayed on a live map.</div>
+            <div class="card-tags">
+                <span class="card-tag">A* Algorithm</span>
+                <span class="card-tag">Crime Data</span>
+                <span class="card-tag">Street Lights</span>
+            </div>
+        </a>
+
+        <a href="4-testing.html" class="card">
+            <div class="card-top">
+                <div class="card-number">04</div>
+                <div class="card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+            <div class="card-title">Quality Control & Testing</div>
+            <div class="card-team">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Thomas / Hamad
+            </div>
+            <div class="card-desc">Testing pipeline from unit tests through Docker integration, plus a side-by-side map comparison proving accessibility-weighted routing avoids obstacles.</div>
+            <div class="card-tags">
+                <span class="card-tag">Unit Tests</span>
+                <span class="card-tag">Docker</span>
+                <span class="card-tag">Route Validation</span>
+            </div>
+        </a>
+
+        <a href="5-challenges.html" class="card">
+            <div class="card-top">
+                <div class="card-number">05</div>
+                <div class="card-arrow">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+            </div>
+            <div class="card-title">Challenges & Lessons Learned</div>
+            <div class="card-team">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Arshia / Andrew / Dunny
+            </div>
+            <div class="card-desc">Data integration architecture showing how 5 disparate sources are unified, plus error handling UI for graceful degradation when data is missing.</div>
+            <div class="card-tags">
+                <span class="card-tag">Data Pipeline</span>
+                <span class="card-tag">Error Handling</span>
+                <span class="card-tag">Architecture</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="footer">
+        Group 2 &middot; MIE350 &middot; University of Toronto &middot; 2026
+    </div>
+</div>
+
+</body>
+</html>
