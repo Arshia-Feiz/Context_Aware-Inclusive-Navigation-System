@@ -76,6 +76,20 @@ public class AuthController {
     }
 
     /**
+     * Get a user's profile and saved preferences.
+     *
+     * GET /api/auth/user/{userId}
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Object> getUser(@PathVariable Long userId) {
+        return authService.getUser(userId)
+                .map(user -> ResponseEntity.ok((Object) userResponse(user, "User found")))
+                .orElse(ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "User not found")));
+    }
+
+    /**
      * Get a user's saved preferences.
      *
      * GET /api/auth/preferences/{userId}
