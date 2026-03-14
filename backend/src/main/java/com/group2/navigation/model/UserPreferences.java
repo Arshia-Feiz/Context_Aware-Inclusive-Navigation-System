@@ -1,5 +1,10 @@
 package com.group2.navigation.model;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+
 /**
  * User preferences for route calculation.
  *
@@ -8,12 +13,29 @@ package com.group2.navigation.model;
  */
 public class UserPreferences {
 
-    private double wheelchairWeight;     // 0-10, avoid non-accessible paths
-    private double crimeWeight;          // 0-10, avoid high-crime areas
-    private double lightingWeight;       // 0-10, prefer lit streets
-    private double constructionWeight;   // 0-10, avoid construction zones
-    private int timeOfDay;               // 0-23, affects lighting penalty strength
-    private double maxDistanceToHospital; // meters, 0 = don't care
+    @DecimalMin(value = "0", message = "Wheelchair weight must be at least 0")
+    @DecimalMax(value = "10", message = "Wheelchair weight must be at most 10")
+    private double wheelchairWeight;
+
+    @DecimalMin(value = "0", message = "Crime weight must be at least 0")
+    @DecimalMax(value = "10", message = "Crime weight must be at most 10")
+    private double crimeWeight;
+
+    @DecimalMin(value = "0", message = "Lighting weight must be at least 0")
+    @DecimalMax(value = "10", message = "Lighting weight must be at most 10")
+    private double lightingWeight;
+
+    @DecimalMin(value = "0", message = "Construction weight must be at least 0")
+    @DecimalMax(value = "10", message = "Construction weight must be at most 10")
+    private double constructionWeight;
+
+    @Min(value = 0, message = "Time of day must be at least 0")
+    @Max(value = 23, message = "Time of day must be at most 23")
+    private int timeOfDay;
+
+    @DecimalMin(value = "0", message = "Max distance to hospital must be at least 0")
+    @DecimalMax(value = "50000", message = "Max distance to hospital must be at most 50000 meters")
+    private double maxDistanceToHospital;
 
     public UserPreferences() {
         this.wheelchairWeight = 0;

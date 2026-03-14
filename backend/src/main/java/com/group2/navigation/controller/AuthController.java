@@ -1,10 +1,15 @@
 package com.group2.navigation.controller;
 
+import com.group2.navigation.dto.LoginRequest;
+import com.group2.navigation.dto.SignupRequest;
 import com.group2.navigation.model.User;
 import com.group2.navigation.model.UserPreferences;
 import com.group2.navigation.service.AuthService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
@@ -18,7 +23,8 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowed-origins:*}")
+@Validated
 public class AuthController {
 
     @Autowired
@@ -28,22 +34,16 @@ public class AuthController {
      * Register a new user.
      *
      * POST /api/auth/signup
-     * Body: { "username": "arshia", "password": "pass123", "displayName": "Arshia" }
+     * Body: { "username": "arshia", "password": "pass1234", "displayName": "Arshia" }
      */
     @PostMapping("/signup")
-    public ResponseEntity<Object> signup(@RequestBody Map<String, String> body) {
+    public ResponseEntity<Object> signup(@Valid @RequestBody SignupRequest body) {
         try {
-            String username = body.get("username");
-            String password = body.get("password");
-            String displayName = body.get("displayName");
+            String username = body.getUsername().trim();
+            String password = body.getPassword();
+            String displayName = sanitizeDisplayName(body.getDisplayName());
 
-            if (username == null || username.isBlank() || password == null || password.isBlank()) {
-                return ResponseEntity.badRequest().body(Map.of(
-                        "success", false,
-                        "message", "Username and password are required"));
-            }
-
-            User user = authService.signup(username.trim(), password, displayName);
+            User user = authService.signup(username, password, displayName);
             return ResponseEntity.ok(userResponse(user, "Account created"));
 
         } catch (IllegalArgumentException e) {
@@ -57,13 +57,13 @@ public class AuthController {
      * Log in with existing credentials.
      *
      * POST /api/auth/login
-     * Body: { "username": "arshia", "password": "pass123" }
+     * Body: { "username": "arshia", "password": "pass1234" }
      */
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody Map<String, String> body) {
+    public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest body) {
         try {
-            String username = body.get("username");
-            String password = body.get("password");
+            String username = body.getUsername().trim();
+            String password = body.getPassword();
 
             User user = authService.login(username, password);
             return ResponseEntity.ok(userResponse(user, "Login successful"));
@@ -81,7 +81,8 @@ public class AuthController {
      * GET /api/auth/user/{userId}
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Object> getUser(@PathVariable Long userId) {
+    public ResponseEntity<Object> getUser(
+            @PathVariable @Min(value = 1, message = "userId must be a positive number") Long userId) {
         return authService.getUser(userId)
                 .map(user -> ResponseEntity.ok((Object) userResponse(user, "User found")))
                 .orElse(ResponseEntity.badRequest().body(Map.of(
@@ -95,7 +96,8 @@ public class AuthController {
      * GET /api/auth/preferences/{userId}
      */
     @GetMapping("/preferences/{userId}")
-    public ResponseEntity<Object> getPreferences(@PathVariable Long userId) {
+    public ResponseEntity<Object> getPreferences(
+            @PathVariable @Min(value = 1, message = "userId must be a positive number") Long userId) {
         return authService.getUser(userId)
                 .map(user -> ResponseEntity.ok((Object) Map.of(
                         "success", true,
@@ -114,8 +116,8 @@ public class AuthController {
      */
     @PutMapping("/preferences/{userId}")
     public ResponseEntity<Object> updatePreferences(
-            @PathVariable Long userId,
-            @RequestBody UserPreferences prefs) {
+            @PathVariable @Min(value = 1, message = "userId must be a positive number") Long userId,
+            @Valid @RequestBody UserPreferences prefs) {
         try {
             User user = authService.updatePreferences(userId, prefs);
             return ResponseEntity.ok(Map.of(
@@ -140,5 +142,11 @@ public class AuthController {
         resp.put("displayName", user.getDisplayName());
         resp.put("preferences", user.toPreferences());
         return resp;
+    }
+
+    /** Strip HTML tags from display name to prevent stored XSS. */
+    private String sanitizeDisplayName(String name) {
+        if (name == null) return null;
+        return name.replaceAll("<[^>]*>", "").trim();
     }
 }
